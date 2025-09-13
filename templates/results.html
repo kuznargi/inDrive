@@ -21,24 +21,24 @@
                     <h3>Результаты локальной модели</h3>
                     
                     <div class="analysis-item">
-                        <strong>Чистота:</strong> {{ analysis_results.local_model.cleanliness }}
-                        {% if analysis_results.local_model.cleanliness == 'clean' %}Чистый
-                        {% elif analysis_results.local_model.cleanliness == 'dirty' %}Грязный
+                        <strong>Чистота:</strong> 
+                        {% if analysis_results.local_model.cleanliness == 'Чистая' %}Чистая
+                        {% elif analysis_results.local_model.cleanliness == 'Грязная' %}Грязная
                         {% else %}{{ analysis_results.local_model.cleanliness|default:"Не определено" }}
                         {% endif %}
                         {% if analysis_results.local_model.cleanliness_confidence %}
-                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.cleanliness_confidence|floatformat:2 }})</span>
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.cleanliness_confidence|floatformat:2 }}%)</span>
                         {% endif %}
                     </div>
                     
                     <div class="analysis-item">
                         <strong>Состояние:</strong> 
-                        {% if analysis_results.local_model.integrity == 'intact' %}Целый
-                        {% elif analysis_results.local_model.integrity == 'damaged' %}Поврежден
+                        {% if analysis_results.local_model.integrity == 'Целый' %}Целый
+                        {% elif analysis_results.local_model.integrity == 'Поврежден' %}Поврежден
                         {% else %}{{ analysis_results.local_model.integrity|default:"Не определено" }}
                         {% endif %}
                         {% if analysis_results.local_model.integrity_confidence %}
-                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.integrity_confidence|floatformat:2 }})</span>
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.integrity_confidence|floatformat:2 }}%)</span>
                         {% endif %}
                     </div>
                 </div>

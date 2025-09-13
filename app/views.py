@@ -145,7 +145,7 @@ def predict_with_pytorch(image_path):
             logger.error("Image preprocessing failed")
             return {"error": "Image preprocessing failed"}
         
-        # Predictions
+        # Run inference
         with torch.no_grad():
             dirt_output = DIRT_MODEL(input_tensor)
             damage_output = DAMAGE_MODEL(input_tensor)
@@ -156,27 +156,25 @@ def predict_with_pytorch(image_path):
             logger.info(f"Dirt prediction raw: {dirt_pred}")
             logger.info(f"Damage prediction raw: {damage_pred}")
             
-            # Get predictions with Russian labels and percentages
+            # Get confidence scores as percentages
             dirt_confidence = float(torch.max(dirt_pred[0])) * 100
             damage_confidence = float(torch.max(damage_pred[0])) * 100
             
             # Determine cleanliness (0=clean, 1=dirty)
             is_dirty = dirt_pred[0][1] > dirt_pred[0][0]
             cleanliness = "Грязная" if is_dirty else "Чистая"
-            dirt_percentage = float(dirt_pred[0][1]) * 100 if is_dirty else float(dirt_pred[0][0]) * 100
             
             # Determine integrity (0=intact, 1=damaged)  
             is_damaged = damage_pred[0][1] > damage_pred[0][0]
             integrity = "Поврежден" if is_damaged else "Целый"
-            damage_percentage = float(damage_pred[0][1]) * 100 if is_damaged else float(damage_pred[0][0]) * 100
+            
+            logger.info(f"Final results - Cleanliness: {cleanliness} ({dirt_confidence:.2f}%), Integrity: {integrity} ({damage_confidence:.2f}%)")
             
             result = {
                 "cleanliness": cleanliness,
-                "cleanliness_percentage": f"{dirt_percentage:.2f}%",
                 "integrity": integrity,
-                "integrity_percentage": f"{damage_percentage:.2f}%",
-                "cleanliness_raw": "dirty" if is_dirty else "clean",
-                "integrity_raw": "damaged" if is_damaged else "intact"
+                "cleanliness_confidence": dirt_confidence,
+                "integrity_confidence": damage_confidence
             }
             
             logger.info(f"PyTorch prediction result: {result}")
@@ -422,6 +420,319 @@ def results_page(request):
         return redirect('login')
     
     # Get analysis results from session
+    analysis_results = request.session.get('analysis_results')
+    image_url = request.session.get('analyzed_image_url')
+    image_name = request.session.get('analyzed_image_name')
+    
+    context = {
+        'analysis_results': analysis_results,
+        'image_url': image_url,
+        'image_name': image_name
+    }
+    
+    return render(request, 'results.html', context)
+def load_yolo_models():
+    """Load dirt and damage detection models using ultralytics.YOLO"""
+    try:
+        dirt_model_path = os.path.join(settings.STATIC_ROOT or settings.BASE_DIR, 'static', 'model', 'dirt_model.pt')
+        damage_model_path = os.path.join(settings.STATIC_ROOT or settings.BASE_DIR, 'static', 'model', 'damage_model.pt')
+        
+        print(f"Loading models from:")
+        print(f"Dirt model: {dirt_model_path}")
+        print(f"Damage model: {damage_model_path}")
+        
+        if not os.path.exists(dirt_model_path):
+            print(f"Dirt model file not found: {dirt_model_path}")
+            return None, None
+        if not os.path.exists(damage_model_path):
+            print(f"Damage model file not found: {damage_model_path}")
+            return None, None
+        
+        dirt_model = YOLO(dirt_model_path)
+        damage_model = YOLO(damage_model_path)
+        
+        print("YOLO models loaded successfully")
+        return dirt_model, damage_model
+        
+    except Exception as e:
+        print(f"Error loading YOLO models: {e}")
+        logger.error(f"Error loading YOLO models: {e}")
+        return None, None
+
+# Global model variables
+DIRT_MODEL, DAMAGE_MODEL = load_yolo_models()
+
+def preprocess_image_for_yolo(image_path):
+    """Preprocess image for YOLO model (no normalization needed, handled by YOLO)"""
+    try:
+        img = cv2.imread(image_path)
+        if img is None:
+            raise ValueError("Failed to load image")
+        return img
+    except Exception as e:
+        logger.error(f"Image preprocessing error: {e}")
+        return None
+
+def analyze_car_condition(image_path):
+    """Analyze car condition using YOLO models for dirt and damage"""
+    try:
+        if DIRT_MODEL is None or DAMAGE_MODEL is None:
+            logger.error("YOLO models not loaded")
+            return {"error": "Models not loaded"}
+
+        # Preprocess image
+        img = preprocess_image_for_yolo(image_path)
+        if img is None:
+            return {"error": "Image preprocessing failed"}
+
+        # Analyze dirt
+        dirt_results = DIRT_MODEL(img, conf=0.5, verbose=False)
+        is_dirty = False
+        dirt_area = 0
+        total_area = img.shape[0] * img.shape[1]
+
+        for r in dirt_results:
+            boxes = r.boxes
+            if boxes is not None:
+                for box in boxes:
+                    cls = int(box.cls[0])
+                    if cls == 1:  # dirt-clean-areas
+                        is_dirty = True
+                        x1, y1, x2, y2 = map(int, box.xyxy[0])
+                        box_area = (x2 - x1) * (y2 - y1)
+                        dirt_area += box_area
+                        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)  # Red for dirt
+
+        dirt_percent = (dirt_area / total_area * 100) if total_area > 0 else 0
+        cleanliness = "Грязная" if is_dirty else "Чистая"
+
+        # Analyze damage
+        damage_results = DAMAGE_MODEL(img, conf=0.5, verbose=False)
+        is_damaged = False
+        damage_area = 0
+        for r in damage_results:
+            boxes = r.boxes
+            if boxes is not None:
+                for box in boxes:
+                    cls = int(box.cls[0])
+                    if cls == 1:  # Scratch
+                        is_damaged = True
+                        x1, y1, x2, y2 = map(int, box.xyxy[0])
+                        box_area = (x2 - x1) * (y2 - y1)
+                        damage_area += box_area
+                        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green for scratch
+
+        damage_percent = (damage_area / total_area * 100) if total_area > 0 else 0
+        integrity = "Поврежден" if is_damaged else "Целый"
+
+        # Save result image
+        result_path = os.path.join(settings.MEDIA_ROOT, 'result.jpg')
+        cv2.imwrite(result_path, img)
+
+        result = {
+            "cleanliness": cleanliness,
+            "dirt_percent": f"{dirt_percent:.2f}%",
+            "integrity": integrity,
+            "damage_percent": f"{damage_percent:.2f}%",
+            "result_image_url": settings.MEDIA_URL + 'result.jpg'
+        }
+
+        logger.info(f"Car condition analysis result: {result}")
+        return result
+
+    except Exception as e:
+        logger.error(f"Car condition analysis error: {e}")
+        return {"error": str(e)}
+
+@csrf_exempt
+def predict_api(request):
+    """API endpoint for car condition prediction"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    try:
+        if 'image' not in request.FILES:
+            return JsonResponse({'error': 'No image file provided'}, status=400)
+        
+        uploaded_file = request.FILES['image']
+        
+        upload_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        file_name = default_storage.save(
+            f'temp/{uploaded_file.name}', 
+            ContentFile(uploaded_file.read())
+        )
+        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+        
+        # Get YOLO model predictions
+        local_result = analyze_car_condition(file_path)
+        
+        # Get Gemini analysis
+        gemini_result = None
+        try:
+            gemini_result = analyze_with_gemini(file_path)
+            logger.info(f"Gemini analysis completed for {uploaded_file.name}")
+        except Exception as e:
+            logger.error(f"Gemini analysis failed: {e}")
+        
+        # Combine results
+        response_data = {
+            "local_model": local_result,
+            "gemini": gemini_result if gemini_result else None
+        }
+        
+        # Clean up temporary file
+        try:
+            os.remove(file_path)
+        except:
+            pass
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        logger.error(f"Prediction API error: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+# [Остальные существующие функции остаются без изменений: signup, face_login, user_logout, profile, home, upload_page, upload_file, results_page]
+def upload_file(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    if request.method == 'POST':
+        try:
+            uploaded_file = request.FILES.get('file')
+            if not uploaded_file:
+                return JsonResponse({'error': 'No file provided'}, status=400)
+            
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            file_name = default_storage.save(
+                f'uploads/{uploaded_file.name}', 
+                ContentFile(uploaded_file.read())
+            )
+            
+            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+            
+            # Get detailed car condition analysis
+            local_result = analyze_car_condition(file_path)
+            logger.info(f"PyTorch analysis completed for {uploaded_file.name}")
+            
+            # Analyze image with Gemini
+            gemini_result = None
+            try:
+                gemini_result = analyze_with_gemini(file_path)
+                logger.info(f"Gemini analysis completed for {uploaded_file.name}")
+            except Exception as e:
+                logger.error(f"Gemini analysis failed: {e}")
+            
+            combined_results = {
+                "local_model": local_result,
+                "gemini": gemini_result if gemini_result else None
+            }
+            
+            request.session['analysis_results'] = combined_results
+            request.session['analyzed_image_url'] = settings.MEDIA_URL + file_name
+            request.session['analyzed_image_name'] = uploaded_file.name
+            
+            response_data = {
+                'success': True,
+                'message': 'File uploaded and analyzed successfully',
+                'file_name': uploaded_file.name,
+                'file_size': uploaded_file.size,
+                'file_path': file_name,
+                'redirect_url': '/results/',
+                'analysis': combined_results
+            }
+            
+            return JsonResponse(response_data)
+            
+        except Exception as e:
+            logger.error(f"Upload error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def results_page(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    analysis_results = request.session.get('analysis_results')
+    image_url = request.session.get('analyzed_image_url')
+    image_name = request.session.get('analyzed_image_name')
+    
+    context = {
+        'analysis_results': analysis_results,
+        'image_url': image_url,
+        'image_name': image_name
+    }
+    
+    return render(request, 'results.html', context)
+
+def upload_file(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    if request.method == 'POST':
+        try:
+            uploaded_file = request.FILES.get('file')
+            if not uploaded_file:
+                return JsonResponse({'error': 'No file provided'}, status=400)
+            
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            file_name = default_storage.save(
+                f'uploads/{uploaded_file.name}', 
+                ContentFile(uploaded_file.read())
+            )
+            
+            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+            
+            # Get detailed car condition analysis
+            local_result = analyze_car_condition(file_path)
+            logger.info(f"PyTorch analysis completed for {uploaded_file.name}")
+            
+            # Analyze image with Gemini
+            gemini_result = None
+            try:
+                gemini_result = analyze_with_gemini(file_path)
+                logger.info(f"Gemini analysis completed for {uploaded_file.name}")
+            except Exception as e:
+                logger.error(f"Gemini analysis failed: {e}")
+            
+            combined_results = {
+                "local_model": local_result,
+                "gemini": gemini_result if gemini_result else None
+            }
+            
+            request.session['analysis_results'] = combined_results
+            request.session['analyzed_image_url'] = settings.MEDIA_URL + file_name
+            request.session['analyzed_image_name'] = uploaded_file.name
+            
+            response_data = {
+                'success': True,
+                'message': 'File uploaded and analyzed successfully',
+                'file_name': uploaded_file.name,
+                'file_size': uploaded_file.size,
+                'file_path': file_name,
+                'redirect_url': '/results/',
+                'analysis': combined_results
+            }
+            
+            return JsonResponse(response_data)
+            
+        except Exception as e:
+            logger.error(f"Upload error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def results_page(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     analysis_results = request.session.get('analysis_results')
     image_url = request.session.get('analyzed_image_url')
     image_name = request.session.get('analyzed_image_name')
