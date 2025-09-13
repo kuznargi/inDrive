@@ -9,4 +9,8 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('', lambda request: render(request, "main.html"), name='main'),
     path('profile/', views.profile, name='profile'),
+    path('upload/', views.upload_page, name='upload_page'),
+    path('upload-file/', views.upload_file, name='upload_file'),
+    path('results/', views.results_page, name='results_page'),
+    path('predict/', views.predict_api, name='predict_api'),
 ]

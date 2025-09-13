@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="top">
+    <i class="uil uil-bars sidebar-toggle"></i>
+</div>
+
+<div class="dash-content">
+    <div class="overview">
+        <div class="title">
+            <i class="uil uil-analytics"></i>
+            <span class="text">Результаты анализа автомобиля</span>
+        </div>
+        
+        <div class="results-container">
+            {% if analysis_results %}
+                <!-- PyTorch Model Results -->
+                {% if analysis_results.local_model %}
+                <div class="analysis-section">
+                    <h3>Результаты локальной модели</h3>
+                    
+                    <div class="analysis-item">
+                        <strong>Чистота:</strong> {{ analysis_results.local_model.cleanliness }}
+                        {% if analysis_results.local_model.cleanliness == 'clean' %}Чистый
+                        {% elif analysis_results.local_model.cleanliness == 'dirty' %}Грязный
+                        {% else %}{{ analysis_results.local_model.cleanliness|default:"Не определено" }}
+                        {% endif %}
+                        {% if analysis_results.local_model.cleanliness_confidence %}
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.cleanliness_confidence|floatformat:2 }})</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <strong>Состояние:</strong> 
+                        {% if analysis_results.local_model.integrity == 'intact' %}Целый
+                        {% elif analysis_results.local_model.integrity == 'damaged' %}Поврежден
+                        {% else %}{{ analysis_results.local_model.integrity|default:"Не определено" }}
+                        {% endif %}
+                        {% if analysis_results.local_model.integrity_confidence %}
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.integrity_confidence|floatformat:2 }})</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Gemini AI Results -->
+                {% if analysis_results.gemini %}
+                <div class="analysis-section">
+                    <h3>Результаты анализа Gemini AI</h3>
+                    
+                    <div class="analysis-item">
+                        <strong>Цвет:</strong> {{ analysis_results.gemini.color|default:"Не определен" }}
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <strong>Марка/Модель:</strong> {{ analysis_results.gemini.brand_model|default:"Не определена" }}
+                    </div>
+                    
+                    {% if analysis_results.gemini.damage_description %}
+                    <div class="analysis-item">
+                        <strong>Описание повреждений:</strong> {{ analysis_results.gemini.damage_description }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="analysis-item">
+                        <strong>Общая оценка:</strong> {{ analysis_results.gemini.overall_condition|default:"Не определена" }}
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <strong>Рекомендации:</strong> {{ analysis_results.gemini.recommendations|default:"Нет рекомендаций" }}
+                    </div>
+                    
+                    {% if analysis_results.gemini.additional_notes %}
+                    <div class="analysis-item">
+                        <strong>Дополнительно:</strong> {{ analysis_results.gemini.additional_notes }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if image_url %}
+                <div class="image-section">
+                    <h3>Загруженное изображение</h3>
+                    <img src="{{ image_url }}" alt="Анализируемый автомобиль" style="max-width: 100%; max-height: 400px; border-radius: 10px;">
+                </div>
+                {% endif %}
+                
+            {% else %}
+                <div class="no-results">
+                    <h3>Нет результатов анализа</h3>
+                    <p>Пожалуйста, загрузите изображение для анализа.</p>
+                </div>
+            {% endif %}
+            
+            <div class="action-buttons">
+                <a href="{% url 'upload_page' %}" class="btn-primary">
+                    <i class="uil uil-upload"></i>
+                    Загрузить новое фото
+                </a>
+                <a href="{% url 'home' %}" class="btn-secondary">
+                    <i class="uil uil-home"></i>
+                    На главную
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.results-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.analysis-section, .image-section, .no-results {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.analysis-section h3, .image-section h3, .no-results h3 {
+    color: #4070f4;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.analysis-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9ff;
+    border-radius: 8px;
+    border-left: 4px solid #4070f4;
+}
+
+.analysis-item strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4070f4, #3658d4);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(64, 112, 244, 0.3);
+}
+
+.btn-secondary {
+    background: #f8f9ff;
+    color: #4070f4;
+    border: 1px solid #e3e8ff;
+}
+
+.btn-secondary:hover {
+    background: #e3e8ff;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

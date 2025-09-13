@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="top">
+    <i class="uil uil-bars sidebar-toggle"></i>
+   
+</div>
+
+<div class="dash-content">
+    <div class="overview">
+        <div class="title">
+            <i class="uil uil-cloud-upload"></i>
+            <span class="text">Image Upload</span>
+        </div>
+        
+        <div class="upload-container">
+            <input type="file" id="file" accept="image/*" hidden>
+            <div class="img-area" data-img="">
+                <i class='bx bxs-cloud-upload icon'></i>
+                <h3>Upload Image</h3>
+                <p>Image size must be less than <span>30MB</span></p>
+            </div>
+            <button class="select-image">Select Image</button>
+            <button class="submit-image" onclick="redirectToResults()">Submit Image</button>
+        </div>
+    </div>
+</div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --blue: #4070f4;
+    --light-blue: #B6DBF6;
+    --dark-blue: #3658d4;
+    --grey: #f2f2f2;
+}
+
+.upload-container {
+    max-width: 400px;
+    width: 100%;
+    background: #fff;
+    padding: 30px;
+    border-radius: 30px;
+    margin: 20px auto;
+    box-shadow: 7px 7px 12px rgba(0,0,0,0.05);
+}
+
+.img-area {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background: var(--grey);
+    margin-bottom: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 2px dashed var(--blue);
+    transition: all 0.3s ease;
+}
+
+.img-area:hover {
+    border-color: var(--dark-blue);
+    background: #f8f9ff;
+}
+
+.img-area .icon {
+    font-size: 100px;
+    color: var(--blue);
+}
+
+.img-area h3 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--blue);
+}
+
+.img-area p {
+    color: #999;
+    text-align: center;
+}
+
+.img-area p span {
+    font-weight: 600;
+    color: var(--blue);
+}
+
+.img-area img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 100;
+    border-radius: 13px;
+}
+
+.img-area::before {
+    content: attr(data-img);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .5);
+    color: #fff;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: all .3s ease;
+    z-index: 200;
+    border-radius: 13px;
+}
+
+.img-area.active:hover::before {
+    opacity: 1;
+}
+
+.select-image {
+    display: block;
+    width: 100%;
+    padding: 16px 0;
+    border-radius: 15px;
+    background: var(--blue);
+    color: #fff;
+    font-weight: 500;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: all .3s ease;
+}
+
+.select-image:hover {
+    background: var(--dark-blue);
+    transform: translateY(-2px);
+}
+
+.submit-image {
+    display: block;
+    width: 100%;
+    padding: 16px 0;
+    border-radius: 15px;
+    background: #10ac84;
+    color: #fff;
+    font-weight: 500;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: all .3s ease;
+    margin-top: 15px;
+}
+
+.submit-image:hover {
+    background: #0e9c75;
+    transform: translateY(-2px);
+}
+
+.submit-image:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.upload-success {
+    background: #10ac84;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+}
+
+.upload-error {
+    background: #ff4757;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    margin-top: 15px;
+    overflow: hidden;
+    display: none;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--blue), var(--dark-blue));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.analysis-results {
+    margin-top: 20px;
+}
+
+.analysis-item {
+    margin-bottom: 10px;
+}
+
+.analysis-item strong {
+    font-weight: 600;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectImage = document.querySelector('.select-image');
+    const inputFile = document.querySelector('#file');
+    const imgArea = document.querySelector('.img-area');
+    const uploadContainer = document.querySelector('.upload-container');
+    const submitImage = document.querySelector('.submit-image');
+
+    selectImage.addEventListener('click', function () {
+        inputFile.click();
+    });
+
+    inputFile.addEventListener('change', function () {
+        const image = this.files[0];
+        
+        if (!image) return;
+
+        // Check file size (30MB limit)
+        if (image.size >= 30000000) {
+            showError("Image size must be less than 30MB");
+            return;
+        }
+
+        // Check if it's an image
+        if (!image.type.startsWith('image/')) {
+            showError("Please select a valid image file");
+            return;
+        }
+
+        // Display image preview
+        const reader = new FileReader();
+        reader.onload = function() {
+            const allImg = imgArea.querySelectorAll('img');
+            allImg.forEach(item => item.remove());
+            
+            const imgUrl = reader.result;
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            imgArea.appendChild(img);
+            imgArea.classList.add('active');
+            imgArea.dataset.img = image.name;
+            
+            // Change button text
+            selectImage.textContent = 'Change Image';
+            selectImage.style.display = 'none';
+            submitImage.style.display = 'block';
+        };
+        reader.readAsDataURL(image);
+    });
+
+    submitImage.addEventListener('click', function () {
+        const image = inputFile.files[0];
+        if (!image) return;
+
+        // Upload the image
+        uploadImage(image);
+    });
+
+    function uploadImage(file) {
+        const formData = new FormData();
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+        }
+        formData.append('file', file);
+
+        // Show progress bar
+        const progressBar = showProgressBar();
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                updateProgress(percentComplete);
+            }
+        });
+
+        xhr.onload = function() {
+            hideProgressBar();
+            
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showSuccess('Image uploaded and analyzed successfully!');
+                        
+                        // Immediately redirect to results page
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url;
+                        }
+                        
+                    } else {
+                        showError('Upload failed: ' + (response.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    showError('Invalid response from server');
+                }
+            } else {
+                showError('Upload failed with status: ' + xhr.status);
+            }
+        };
+
+        xhr.onerror = function() {
+            hideProgressBar();
+            showError('Network error occurred during upload');
+        };
+
+        xhr.open('POST', '{% url "upload_file" %}');
+        xhr.send(formData);
+    }
+
+    function displayAnalysisResults(analysis) {
+        // Remove existing analysis display
+        const existingAnalysis = uploadContainer.querySelector('.analysis-results');
+        if (existingAnalysis) {
+            existingAnalysis.remove();
+        }
+
+        // Store analysis results for results page
+        localStorage.setItem('analysisResults', JSON.stringify(analysis));
+        
+        // Store image URL for results page
+        const imgElement = uploadContainer.querySelector('.img-area img');
+        if (imgElement) {
+            localStorage.setItem('analyzedImageUrl', imgElement.src);
+        }
+
+        // Create analysis results display
+        const analysisDiv = document.createElement('div');
+        analysisDiv.className = 'analysis-results';
+        analysisDiv.innerHTML = `
+            <h4>Анализ автомобиля:</h4>
+            <div class="analysis-item">
+                <strong>Чистота:</strong> <span>${analysis.cleanliness || 'Не определено'}</span>
+            </div>
+            <div class="analysis-item">
+                <strong>Состояние:</strong> <span>${analysis.damage || 'Не определено'}</span>
+            </div>
+            ${analysis.damage_description ? `
+            <div class="analysis-item">
+                <strong>Описание повреждений:</strong> <span>${analysis.damage_description}</span>
+            </div>
+            ` : ''}
+            <div class="analysis-item">
+                <strong>Цвет:</strong> <span>${analysis.color || 'Не определен'}</span>
+            </div>
+            <div class="analysis-item">
+                <strong>Марка/Модель:</strong> <span>${analysis.brand_model || 'Не определена'}</span>
+            </div>
+            ${analysis.additional_notes ? `
+            <div class="analysis-item">
+                <strong>Дополнительно:</strong> <span>${analysis.additional_notes}</span>
+            </div>
+            ` : ''}
+        `;
+        
+        uploadContainer.appendChild(analysisDiv);
+    }
+
+    function redirectToResults() {
+        // Check if analysis results exist in localStorage or redirect directly
+        const analysisData = localStorage.getItem('analysisResults');
+        if (analysisData) {
+            window.location.href = '{% url "results_page" %}';
+        } else {
+            // If no analysis data, redirect anyway to results page
+            window.location.href = '{% url "results_page" %}';
+        }
+    }
+
+    function showProgressBar() {
+        let progressBar = uploadContainer.querySelector('.progress-bar');
+        if (!progressBar) {
+            progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            progressBar.innerHTML = '<div class="progress-fill"></div>';
+            uploadContainer.appendChild(progressBar);
+        }
+        progressBar.style.display = 'block';
+        return progressBar;
+    }
+
+    function updateProgress(percent) {
+        const progressFill = uploadContainer.querySelector('.progress-fill');
+        if (progressFill) {
+            progressFill.style.width = percent + '%';
+        }
+    }
+
+    function hideProgressBar() {
+        const progressBar = uploadContainer.querySelector('.progress-bar');
+        if (progressBar) {
+            progressBar.style.display = 'none';
+        }
+    }
+
+    function showSuccess(message) {
+        hideMessages();
+        let successDiv = uploadContainer.querySelector('.upload-success');
+        if (!successDiv) {
+            successDiv = document.createElement('div');
+            successDiv.className = 'upload-success';
+            uploadContainer.appendChild(successDiv);
+        }
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+        }, 3000);
+    }
+
+    function showError(message) {
+        hideMessages();
+        let errorDiv = uploadContainer.querySelector('.upload-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'upload-error';
+            uploadContainer.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    function hideMessages() {
+        const success = uploadContainer.querySelector('.upload-success');
+        const error = uploadContainer.querySelector('.upload-error');
+        if (success) success.style.display = 'none';
+        if (error) error.style.display = 'none';
+    }
+});
+</script>
+
+<!-- Add CSRF token for AJAX requests -->
+<form style="display: none;">
+    {% csrf_token %}
+</form>
+{% endblock %}

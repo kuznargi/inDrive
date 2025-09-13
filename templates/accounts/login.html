@@ -40,6 +40,22 @@
     .auth-left h2{margin:0 0 .5rem 0}
     .auth-left p{opacity:.9}
     .auth-right { display:flex; flex-direction:column; gap:0.75rem; align-items:center; justify-content:center; }
+    
+    .tag-box {
+      margin-bottom: 1rem;
+    }
+    .tag {
+      display: inline-block;
+      background: rgba(106, 140, 255, 0.2);
+      color: #6a8cff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(106, 140, 255, 0.3);
+    }
+    
     .input-field {
       width:100%;
       padding: .75rem 1rem;
@@ -48,7 +64,12 @@
       border-radius: 10px;
       color: #fff;
       outline:none;
+      margin-bottom: 0.6rem;
     }
+    .input-field::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+    
     .btn-primary {
       display:inline-block;
       background: linear-gradient(90deg,#6a8cff,#9b6bff);
@@ -59,7 +80,13 @@
       cursor:pointer;
       font-weight:600;
       text-decoration:none;
+      transition: all 0.3s ease;
     }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(106, 140, 255, 0.4);
+    }
+    
     .face-area { width:100%; display:flex; flex-direction:column; align-items:center; gap:.5rem; }
     @media (max-width:900px){
       .auth-card { grid-template-columns: 1fr; }
@@ -84,7 +111,7 @@
         <div>
           <div class="tag-box"><div class="tag">SECURE · FAST · SIMPLE</div></div>
           <h2>Войдите в аккаунт</h2>
-          <p>Вход по логину/паролю или с помощью захвата лица. Мы используем безопасное хранение данных и авторизацию.</p>
+          <p>Вход с помощью захвата лица. Мы используем безопасное хранение данных и авторизацию.</p>
         </div>
 
         <div style="margin-top:1rem;">
@@ -96,9 +123,11 @@
       <div class="auth-right" data-aos="fade-left" data-aos-duration="1000">
         <form method="post" enctype="multipart/form-data" style="width:100%; max-width:360px;">
           {% csrf_token %}
-          <input class="input-field" type="text" name="username" placeholder="Username" required>
-          <input class="input-field" type="password" name="password" placeholder="Password" required style="margin-top:.6rem;">
-          
+          {% if error %}
+          <div style="background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #ff6b6b; text-align: center;">
+            {{ error }}
+          </div>
+          {% endif %}
           <div class="face-area" style="margin-top:.6rem;">
             <div id="video-container" style="position:relative;width:320px;height:240px;border-radius:8px;overflow:hidden;">
               <video id="video" width="320" height="240" autoplay muted playsinline></video>
@@ -108,9 +137,8 @@
             <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
             <input type="file" name="face_image" id="face_image" style="display:none;" required>
 
-            <div style="display:flex;gap:.6rem;margin-top:.6rem;">
-              <button type="button" id="capture" class="btn-primary">Сфотографировать</button>
-              <button type="submit" class="btn-primary" style="background:transparent;border:1px solid rgba(255,255,255,0.12);">Войти</button>
+            <div style="display:flex;gap:.6rem;margin-top:.6rem;justify-content:center;">
+              <button type="submit" class="btn-primary" id="loginBtn">Войти</button>
             </div>
           </div>
         </form>
@@ -119,7 +147,7 @@
   </main>
 
   <footer style="text-align:center;padding:2rem 0;color:#ddd;">
-    <div class="brand">MindMapse</div>
+    <div class="brand">MindMap</div>
   </footer>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
@@ -145,17 +173,33 @@
     }
     drawMask();
 
-    document.getElementById('capture').addEventListener('click', () => {
+    document.getElementById('loginBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Login button clicked');
+      
       let canvas = document.getElementById('canvas');
       let v = document.getElementById('video');
+      
+      if (!v.srcObject) {
+        alert('Камера не подключена. Пожалуйста, разрешите доступ к камере.');
+        return;
+      }
+      
       canvas.getContext('2d').drawImage(v,0,0,320,240);
       canvas.toBlob(blob=>{
+        if (!blob) {
+          alert('Ошибка захвата изображения');
+          return;
+        }
+        
         let file = new File([blob],"face.jpg",{type:"image/jpeg"});
         let dt = new DataTransfer(); 
         dt.items.add(file); 
         document.getElementById('face_image').files = dt.files;
-        alert("✅ Лицо зафиксировано!");
-      });
+        
+        console.log('Face image captured, submitting form');
+        document.querySelector('form').submit();
+      }, 'image/jpeg', 0.8);
     });
   </script>
 </body>
