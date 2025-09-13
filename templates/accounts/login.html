@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MindMap — Login</title>
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <link rel="stylesheet" href="{% static 'css/mainPage.css' %}">
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 3rem 1rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 880px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .auth-left {
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      justify-content:center;
+    }
+    .auth-left h2{margin:0 0 .5rem 0}
+    .auth-left p{opacity:.9}
+    .auth-right { display:flex; flex-direction:column; gap:0.75rem; align-items:center; justify-content:center; }
+    .input-field {
+      width:100%;
+      padding: .75rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      color: #fff;
+      outline:none;
+    }
+    .btn-primary {
+      display:inline-block;
+      background: linear-gradient(90deg,#6a8cff,#9b6bff);
+      color:#fff;
+      padding:.75rem 1.2rem;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      text-decoration:none;
+    }
+    .face-area { width:100%; display:flex; flex-direction:column; align-items:center; gap:.5rem; }
+    @media (max-width:900px){
+      .auth-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <img class="image-gradient" src="{% static 'img/gradient.png' %}" alt="" aria-hidden="true">
+  <div class="layer-blur"></div>
+
+  <header>
+    <h1 data-aos="fade-down" data-aos-duration="1500" class="logo">MindMap</h1>
+    <div class="auth-btn">
+      <a data-aos="fade-down" data-aos-duration="1500" class="btn-signing" href="{% url 'login' %}" role="button">SIGN IN</a>
+      <a data-aos="fade-down" data-aos-duration="1500" class="btn-signing" href="{% url 'signup' %}" role="button">SIGN UP</a>
+    </div>
+  </header>
+
+  <main class="auth-page">
+    <section class="auth-card" data-aos="fade-up" data-aos-duration="1000">
+      <div class="auth-left" data-aos="fade-right" data-aos-duration="1000">
+        <div>
+          <div class="tag-box"><div class="tag">SECURE · FAST · SIMPLE</div></div>
+          <h2>Войдите в аккаунт</h2>
+          <p>Вход по логину/паролю или с помощью захвата лица. Мы используем безопасное хранение данных и авторизацию.</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <a class="btn-signing" href="{% url 'signup' %}">Создать аккаунт</a>
+          <!-- <a class="btn-signing" href="#" style="margin-left:0.6rem">Документация</a> -->
+        </div>
+      </div>
+
+      <div class="auth-right" data-aos="fade-left" data-aos-duration="1000">
+        <form method="post" enctype="multipart/form-data" style="width:100%; max-width:360px;">
+          {% csrf_token %}
+          <input class="input-field" type="text" name="username" placeholder="Username" required>
+          <input class="input-field" type="password" name="password" placeholder="Password" required style="margin-top:.6rem;">
+          
+          <div class="face-area" style="margin-top:.6rem;">
+            <div id="video-container" style="position:relative;width:320px;height:240px;border-radius:8px;overflow:hidden;">
+              <video id="video" width="320" height="240" autoplay muted playsinline></video>
+              <canvas id="overlay" width="320" height="240" style="position:absolute;left:0;top:0;pointer-events:none;"></canvas>
+            </div>
+
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+            <input type="file" name="face_image" id="face_image" style="display:none;" required>
+
+            <div style="display:flex;gap:.6rem;margin-top:.6rem;">
+              <button type="button" id="capture" class="btn-primary">Сфотографировать</button>
+              <button type="submit" class="btn-primary" style="background:transparent;border:1px solid rgba(255,255,255,0.12);">Войти</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align:center;padding:2rem 0;color:#ddd;">
+    <div class="brand">MindMapse</div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init();
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      document.getElementById('video').srcObject = stream;
+    }).catch(()=>{ /* ignore */ });
+
+    let overlay = document.getElementById('overlay');
+    let ctx = overlay.getContext('2d');
+    function drawMask(){
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0,0,overlay.width,overlay.height);
+      let cx=overlay.width/2, cy=overlay.height/2, rx=80, ry=100;
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,2*Math.PI); ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = "lime"; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,2*Math.PI); ctx.stroke();
+      requestAnimationFrame(drawMask);
+    }
+    drawMask();
+
+    document.getElementById('capture').addEventListener('click', () => {
+      let canvas = document.getElementById('canvas');
+      let v = document.getElementById('video');
+      canvas.getContext('2d').drawImage(v,0,0,320,240);
+      canvas.toBlob(blob=>{
+        let file = new File([blob],"face.jpg",{type:"image/jpeg"});
+        let dt = new DataTransfer(); 
+        dt.items.add(file); 
+        document.getElementById('face_image').files = dt.files;
+        alert("✅ Лицо зафиксировано!");
+      });
+    });
+  </script>
+</body>
+</html>
