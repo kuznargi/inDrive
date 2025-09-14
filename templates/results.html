@@ -12,43 +12,68 @@
             <i class="uil uil-analytics"></i>
             <span class="text">Результаты анализа автомобиля</span>
         </div>
-        
-        <div class="results-container">
+           
+        <div class="results-container grid">
             {% if analysis_results %}
-                <!-- PyTorch Model Results -->
-                {% if analysis_results.local_model %}
-                <div class="analysis-section">
-                    <h3>Результаты локальной модели</h3>
-                    
-                    <div class="analysis-item">
-                        <strong>Чистота:</strong> 
-                        {% if analysis_results.local_model.cleanliness == 'Чистая' %}Чистая
-                        {% elif analysis_results.local_model.cleanliness == 'Грязная' %}Грязная
-                        {% else %}{{ analysis_results.local_model.cleanliness|default:"Не определено" }}
-                        {% endif %}
-                        {% if analysis_results.local_model.cleanliness_confidence %}
-                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.cleanliness_confidence|floatformat:2 }}%)</span>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="analysis-item">
-                        <strong>Состояние:</strong> 
-                        {% if analysis_results.local_model.integrity == 'Целый' %}Целый
-                        {% elif analysis_results.local_model.integrity == 'Поврежден' %}Поврежден
-                        {% else %}{{ analysis_results.local_model.integrity|default:"Не определено" }}
-                        {% endif %}
-                        {% if analysis_results.local_model.integrity_confidence %}
-                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.local_model.integrity_confidence|floatformat:2 }}%)</span>
-                        {% endif %}
-                    </div>
+            <div class="left-col">
+                {% if image_url %}
+                <div class="card image-card">
+                    <img src="{{ image_url }}" alt="Анализируемый автомобиль">
                 </div>
                 {% endif %}
-                
-                <!-- Gemini AI Results -->
+
+                {% if analysis_results.local_model %}
+                <!-- <div class="card">
+                    <h3 class="card-title">Локальная модель</h3>
+                    <div class="card-row">
+                        <div>
+                            <div class="label">Чистота</div>
+                            <div class="value">{{ analysis_results.local_model.cleanliness|default:"Не определено" }}</div>
+                            {% if analysis_results.local_model.dirt_percent %}
+                            <div class="progress"><div class="progress-fill" style="width: {{ analysis_results.local_model.dirt_percent }}%"></div></div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="label">Состояние</div>
+                            <div class="value">{{ analysis_results.local_model.integrity|default:"Не определено" }}</div>
+                            {% if analysis_results.local_model.integrity_confidence %}
+                            <div class="progress"><div class="progress-fill" style="width: {{ analysis_results.local_model.integrity_confidence }}%"></div></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if analysis_results.local_model.detected_classes %}
+                    <div class="chips">
+                        {% for name, count in analysis_results.local_model.detected_classes.items %}
+                            <span class="chip">{{ name }} <strong>{{ count }}</strong></span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div> -->
+                {% endif %}
+            </div>
+
+            <div class="right-col">
                 {% if analysis_results.gemini %}
-                <div class="analysis-section">
-                    <h3>Результаты анализа Gemini AI</h3>
+                <div class="card">
+                    <h3 class="card-title">Analysis</h3>
+                    <div class="card-row">
+                       
                     
+                     <div class="analysis-item">
+                        <strong>Чистота :</strong> {{ analysis_results.gemini.cleanliness|default:"Не определена" }}
+                        {% if analysis_results.gemini.cleanliness_confidence %}
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.gemini.cleanliness_confidence|floatformat:2 }}%)</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <strong>Состояние :</strong> {{ analysis_results.gemini.integrity|default:"Не определено" }}
+                        {% if analysis_results.gemini.integrity_confidence %}
+                        <span style="color: #666; margin-left: 10px;">({{ analysis_results.gemini.integrity_confidence|floatformat:2 }}%)</span>
+                        {% endif %}
+                    </div>
+
                     <div class="analysis-item">
                         <strong>Цвет:</strong> {{ analysis_results.gemini.color|default:"Не определен" }}
                     </div>
@@ -78,14 +103,8 @@
                     {% endif %}
                 </div>
                 {% endif %}
-                
-                {% if image_url %}
-                <div class="image-section">
-                    <h3>Загруженное изображение</h3>
-                    <img src="{{ image_url }}" alt="Анализируемый автомобиль" style="max-width: 100%; max-height: 400px; border-radius: 10px;">
-                </div>
-                {% endif %}
-                
+            </div>
+
             {% else %}
                 <div class="no-results">
                     <h3>Нет результатов анализа</h3>

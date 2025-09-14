@@ -94,5 +94,15 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 30 * 1024 * 1024  # 30MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 30 * 1024 * 1024  # 30MB
 FILE_UPLOAD_PERMISSIONS = 0o644
 
+# Face recognition thresholds (can be overridden in .env)
+FACE_MATCH_THRESHOLD = float(os.getenv('FACE_MATCH_THRESHOLD', '0.7'))
+FACE_MIN_SIMILARITY = float(os.getenv('FACE_MIN_SIMILARITY', '0.3'))
+
+# Default static model directory (use BASE_DIR to be explicit)
+MODEL_DIR = BASE_DIR / 'static' / 'model'
+
+# PyTorch confidence threshold (0-1), used to mark predictions as confident
+PYTORCH_CONFIDENCE_THRESHOLD = float(os.getenv('PYTORCH_CONFIDENCE_THRESHOLD', '0.6'))
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "app.CustomUser"

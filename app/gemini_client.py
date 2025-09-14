@@ -14,7 +14,6 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 def analyze_with_gemini(image_path: str) -> dict:
     """
-    Analyze car photo using Google Gemini AI
     
     Args:
         image_path (str): Path to the uploaded image file
@@ -25,39 +24,46 @@ def analyze_with_gemini(image_path: str) -> dict:
     try:
         # Initialize the model
         model = genai.GenerativeModel('gemini-1.5-flash')
-        
+
         # Open and prepare the image
         image = Image.open(image_path)
-        
+
         # Create the prompt for car analysis
         prompt = """
-        Ты получаешь фотографию автомобиля. 
-        Определи:
-        - цвет
-        - марку/модель, если можно распознать
-        - описание повреждений (коротко, если есть)
-        - общую оценку состояния автомобиля (отличное/хорошее/удовлетворительное/плохое)
-        - рекомендации по обслуживанию или ремонту
-        - дополнительные детали (например, наклейки, багажник открыт, тонировка)
-        Верни ответ строго в JSON формате без дополнительного текста.
-        
-        Пример ответа:
-        {
-          "color": "белый",
-          "brand_model": "Toyota Camry",
-          "damage_description": "царапина на переднем бампере",
-          "overall_condition": "хорошее",
-          "recommendations": "рекомендуется устранить царапину и провести полировку",
-          "additional_notes": "тонированные стекла"
-        }
-        """
-        
+Ты получаешь фотографию автомобиля.
+Определи строго в JSON формате (никакого лишнего текста):
+- color: цвет автомобиля (строка)
+- brand_model: марка и модель, если возможно определить (строка)
+- damage_description: краткое описание повреждений (строка)
+- overall_condition: общая оценка ("отличное"/"хорошее"/"удовлетворительное"/"плохое")
+- recommendations: рекомендации по ремонту/обслуживанию (строка)
+- additional_notes: дополнительные наблюдения (строка)
+- cleanliness: "Чистая" или "Грязная"
+- cleanliness_confidence: процент уверенности (число 0-100)
+- integrity: "Целый" или "Поврежден"
+- integrity_confidence: процент уверенности (число 0-100)
+
+Пример ответа:
+{
+  "color": "белый",
+  "brand_model": "Toyota Camry",
+  "damage_description": "царапина на переднем бампере",
+  "overall_condition": "хорошее",
+  "recommendations": "рекомендуется устранить царапину и провести полировку",
+  "additional_notes": "тонированные стекла",
+  "cleanliness": "Грязная",
+  "cleanliness_confidence": 92.5,
+  "integrity": "Поврежден",
+  "integrity_confidence": 78.2
+}
+"""
+
         # Generate content with the image and prompt
         response = model.generate_content([prompt, image])
-        
+
         # Parse the response
         response_text = response.text.strip()
-        
+
         # Try to extract JSON from the response
         try:
             # Remove any markdown formatting if present
@@ -65,31 +71,45 @@ def analyze_with_gemini(image_path: str) -> dict:
                 response_text = response_text.replace('```json', '').replace('```', '').strip()
             elif response_text.startswith('```'):
                 response_text = response_text.replace('```', '').strip()
-            
+
             # Parse JSON
             analysis_result = json.loads(response_text)
-            
-            # Validate required fields
-            required_fields = ['color', 'brand_model', 'damage_description', 'overall_condition', 'recommendations', 'additional_notes']
-            for field in required_fields:
-                if field not in analysis_result:
-                    analysis_result[field] = ""
-            
+
+            # Ensure the presence of the extended fields and provide sensible defaults
+            defaults = {
+                'color': '',
+                'brand_model': '',
+                'damage_description': '',
+                'overall_condition': '',
+                'recommendations': '',
+                'additional_notes': '',
+                'cleanliness': '',
+                'cleanliness_confidence': 0.0,
+                'integrity': '',
+                'integrity_confidence': 0.0,
+            }
+            for k, v in defaults.items():
+                analysis_result.setdefault(k, v)
+
             logger.info(f"Successfully analyzed image: {image_path}")
             return analysis_result
-            
+
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Response text: {response_text}")
-            
+
             # Return a default structure if JSON parsing fails
             return {
-                "color": "unknown",
-                "brand_model": "unknown",
-                "damage_description": "Не удалось проанализировать",
-                "overall_condition": "unknown",
-                "recommendations": "unknown",
-                "additional_notes": f"Ошибка анализа: {response_text[:100]}..."
+                'color': 'unknown',
+                'brand_model': 'unknown',
+                'damage_description': 'Не удалось проанализировать',
+                'overall_condition': 'unknown',
+                'recommendations': 'unknown',
+                'additional_notes': f"Ошибка анализа: {response_text[:100]}...",
+                'cleanliness': '',
+                'cleanliness_confidence': 0.0,
+                'integrity': '',
+                'integrity_confidence': 0.0,
             }
             
     except Exception as e:
@@ -110,3 +130,11 @@ def test_gemini_connection() -> bool:
     except Exception as e:
         logger.error(f"Gemini connection test failed: {e}")
         return False
+
+
+def ensure_gemini_api_key_configured() -> bool:
+    """Quick helper to check if API key is present and returns boolean."""
+    if not GEMINI_API_KEY or GEMINI_API_KEY == 'your-api-key-here':
+        logger.warning('GEMINI_API_KEY not set or using default placeholder')
+        return False
+    return True

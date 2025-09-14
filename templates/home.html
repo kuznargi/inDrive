@@ -1,123 +1,243 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="top">
-            <i class="uil uil-bars sidebar-toggle"></i>
-            
-        </div>
+    <i class="uil uil-bars sidebar-toggle"></i>
+</div>
 
-        <div class="dash-content">
-            <div class="overview">
-                <div class="title">
-                    <i class="uil uil-tachometer-fast-alt"></i>
-                    <span class="text">Dashboard</span>
+<div class="driver-dashboard">
+    <div class="dashboard-grid">
+        <!-- Sidebar -->
+        <aside class="side">
+            <div class="vehicle-card card">
+                <div class="vehicle-header">
+                    <h3>Мой автомобиль</h3>
+                    <span class="vehicle-meta">Toyota Camry • 2018</span>
                 </div>
-
-                <div class="boxes">
-                    <div class="box box1">
-                        <i class="uil uil-thumbs-up"></i>
-                        <span class="text">Total Likes</span>
-                        <span class="number">50,120</span>
+                <div class="vehicle-body">
+                    <div class="vehicle-info">
+                        <div><strong>VIN:</strong> <span class="muted">123-123-13</span></div>
+                        <div><strong>Пробег:</strong> <span class="muted">120,340 км</span></div>
+                        <div><strong>Последняя проверка:</strong> <span class="muted">2025-09-10</span></div>
                     </div>
-                    <div class="box box2">
-                        <i class="uil uil-comments"></i>
-                        <span class="text">Comments</span>
-                        <span class="number">20,120</span>
-                    </div>
-                    <div class="box box3">
-                        <i class="uil uil-share"></i>
-                        <span class="text">Total Share</span>
-                        <span class="number">10,120</span>
+                    <div class="vehicle-actions">
+                        <a href="{% url 'upload_page' %}" class="btn btn-primary">🚗 Загрузить фото</a>
+                        <a href="{% url 'results_page' %}" class="btn btn-secondary">📊 Последние результаты</a>
                     </div>
                 </div>
             </div>
 
-            <div class="activity">
-                <div class="title">
-                    <i class="uil uil-clock-three"></i>
-                    <span class="text">Recent Activity</span>
-                </div>
+            <div class="alerts card">
+                <h4>Оповещения</h4>
+                <ul>
+                    <li class="alert warning">⚠️ Проверка тормозной системы через 200 км</li>
+                    <li class="alert info">ℹ️ Срок ТО: 2025-10-01</li>
+                </ul>
+            </div>
+        </aside>
 
-                <div class="activity-data">
-                    <div class="data names">
-                        <span class="data-title">Name</span>
-                        <span class="data-list">Prem Shahi</span>
-                        <span class="data-list">Deepa Chand</span>
-                        <span class="data-list">Manisha Chand</span>
-                        <span class="data-list">Pratima Shahi</span>
-                        <span class="data-list">Man Shahi</span>
-                        <span class="data-list">Ganesh Chand</span>
-                        <span class="data-list">Bikash Chand</span>
-                    </div>
-                    <div class="data email">
-                        <span class="data-title">Email</span>
-                        <span class="data-list">premshahi@gmail.com</span>
-                        <span class="data-list">deepachand@gmail.com</span>
-                        <span class="data-list">prakashhai@gmail.com</span>
-                        <span class="data-list">manishachand@gmail.com</span>
-                        <span class="data-list">pratimashhai@gmail.com</span>
-                        <span class="data-list">manshahi@gmail.com</span>
-                        <span class="data-list">ganeshchand@gmail.com</span>
-                    </div>
-                    <div class="data joined">
-                        <span class="data-title">Joined</span>
-                        <span class="data-list">2022-02-12</span>
-                        <span class="data-list">2022-02-12</span>
-                        <span class="data-list">2022-02-13</span>
-                        <span class="data-list">2022-02-13</span>
-                        <span class="data-list">2022-02-14</span>
-                        <span class="data-list">2022-02-14</span>
-                        <span class="data-list">2022-02-15</span>
-                    </div>
-                    <div class="data type">
-                        <span class="data-title">Type</span>
-                        <span class="data-list">New</span>
-                        <span class="data-list">Member</span>
-                        <span class="data-list">Member</span>
-                        <span class="data-list">New</span>
-                        <span class="data-list">Member</span>
-                        <span class="data-list">New</span>
-                        <span class="data-list">Member</span>
-                    </div>
-                    <div class="data status">
-                        <span class="data-title">Status</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                        <span class="data-list">Liked</span>
-                    </div>
+        <!-- Main -->
+        <main class="main">
+            <div class="quick-actions card">
+                <h4>Быстрые действия</h4>
+                <div class="actions-grid">
+                    <a href="{% url 'upload_page' %}" class="action">
+                        <i class="uil uil-upload"></i>
+                        <span>Загрузить фото</span>
+                    </a>
+                    <a href="{% url 'results_page' %}" class="action">
+                        <i class="uil uil-analytics"></i>
+                        <span>Мои анализы</span>
+                    </a>
+                    <a href="#" class="action">
+                        <i class="uil uil-car-sideview"></i>
+                        <span>Профиль авто</span>
+                    </a>
                 </div>
             </div>
-        </div>
+
+            <div class="recent card">
+                <h4>Последние загрузки</h4>
+                <div class="recent-list">
+                    {% if request.session.analysis_results %}
+                        <div class="recent-item">
+                            <img src="{{ request.session.analyzed_image_url }}" alt="thumb">
+                            <div class="meta">
+                                <div class="title">{{ request.session.analyzed_image_name }}</div>
+                                <div class="time">Последний анализ</div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="muted">Нет загруженных изображений</div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+/* Base */
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f6fa;
+    color: #111827;
+}
+
+/* Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* Card */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+/* Vehicle card */
+.vehicle-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+.vehicle-meta {
+    color: #6b7280;
+    font-size: 14px;
+}
+.vehicle-body {
+    margin-top: 14px;
+}
+.vehicle-info div {
+    margin-bottom: 8px;
+}
+.vehicle-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background: linear-gradient(135deg,#3b82f6,#2563eb);
+    color: #fff;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+}
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* Alerts */
+.alerts ul {
+    padding-left: 18px;
+    margin: 10px 0;
+}
+.alert {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.alert.warning {
+    background: #fff7ed;
+    color: #b45309;
+}
+.alert.info {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+/* Quick actions */
+.quick-actions .actions-grid {
+    display: flex;
+    gap: 14px;
+}
+.action {
+    flex: 1;
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #111827;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s;
+}
+.action i {
+    font-size: 24px;
+    margin-bottom: 6px;
+}
+.action:hover {
+    background: #eef2ff;
+    transform: translateY(-3px);
+}
+
+/* Recent */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.recent-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+.recent-item:hover {
+    transform: translateX(4px);
+}
+.recent-item img {
+    width: 72px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.meta .title {
+    font-weight: 600;
+}
+.muted {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media(max-width:900px){
+    .dashboard-grid{grid-template-columns:1fr;}
+    .side{order:2}
+    .main{order:1}
+}
+</style>
+
 {% endblock %}
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-</head>
-<body>
-  <h2>Welcome {{ request.user.username }} 🎉</h2>
-
-  <form method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-  </form>
-</body>
-</html>
-
-</body>
-</html> -->

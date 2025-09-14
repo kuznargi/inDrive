@@ -20,7 +20,7 @@
     <ul class="nav-links">
       <li><a data-aos="fade-down" data-aos-duration="1500" href="#">Home</a></li>
       <li><a data-aos="fade-down" data-aos-duration="2000" href="#aboutUs">About</a></li>
-      <li><a data-aos="fade-down" data-aos-duration="2500" href="#features">Features</a></li>
+      <li><a data-aos="fade-down" data-aos-duration="2500" href="#problems">Problems</a></li>
       <li><a data-aos="fade-down" data-aos-duration="3000" href="#faq">FAQ</a></li>
     </ul>
   </nav>
@@ -35,31 +35,30 @@
      data-aos-easing="ease-in-back"
      data-aos-delay="300"
      data-aos-offset="0" data-aos-duration="1500" class="tag-box">
-            <div class="tag" 
-            >INTRUDUCING &wedbar;</div>
+            <div class="tag">INTRODUCING &wedbar;</div>
         </div>
    
     <h1 data-aos="fade-zoom-in"
      data-aos-easing="ease-in-back"
      data-aos-delay="300"
-     data-aos-offset="0" data-aos-duration="2000">ENAIL FOR <br> DEVELOPER </h1>
+     data-aos-offset="0" data-aos-duration="2000">AI SOLUTIONS <br> FOR MOBILITY </h1>
     <div data-aos="fade-zoom-in"
      data-aos-easing="ease-in-back"
      data-aos-delay="300"
      data-aos-offset="0" data-aos-duration="2500" class="description">
-        <p>The best way to reach humans instead of spam folders is by crafting relevant, valuable content and using verified sending domains. Focus on permission-based email lists, clear subject lines, and proper authentication to ensure your message lands in the inbox.</p>
+        <p>Мы используем Face ID и Car Detection для повышения безопасности и прозрачности в сервисах каршеринга и такси. Автоматическая верификация водителя и контроль состояния автомобиля помогают создать доверие и снизить риски.</p>
         <div data-aos="fade-zoom-in"
      data-aos-easing="ease-in-back"
      data-aos-delay="300"
      data-aos-offset="0" data-aos-duration="3000" class="buttons">
-            <!-- <a href="#"  class="btn-get-started">Documentation &gt;</a> -->
-            <a href="" class="btn-signing-main">Getstarted &gt;</a>
+            <a href="{% url 'signup' %}" class="btn-signing-main">Get started &gt;</a>
         </div>
     
     </div>
     </div>
      </div>
 </main>
+
 
 <!-- ABOUT -->
 <section id="aboutUs" class="about-section" aria-labelledby="about-title" data-aos="fade-up" data-aos-duration="1000">
@@ -68,63 +67,62 @@
     <div class="about-grid">
         
       <div class="about-content" data-aos="fade-right" data-aos-duration="1000" data-aos-delay="150">
-        
-        <p>EdgeLab — команда инженеров и дизайнеров, создающая лёгкие и безопасные решения на границе сети и облака. Мы делаем продукты, которые быстро разворачиваются и удобны разработчикам.</p>
-        <p class="muted">От прототипа до продакшена: автоматизация, надежность и внимание к UX.</p>
-        </div>
+        <p>Мы — команда MindMap, объединяющая разработчиков и исследователей в области искусственного интеллекта и компьютерного зрения. Наша миссия — сделать мобильность безопаснее и прозрачнее для всех.</p>
+        <p>Мы разрабатываем инновационные решения на базе <b>Face ID</b> для верификации водителей и <b>Car Detection</b> для мониторинга состояния автомобилей. Это помогает компаниям снижать расходы на инциденты, а пользователям — доверять сервису.</p>
+        <p class="muted">Наша цель — простые и надёжные технологии, которые легко интегрируются и приносят реальную пользу в реальном мире.</p>
+      </div>
+      
       <div class="about-photo" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="250">
-        <img src="about-photo.jpg" alt="Team working together">
+        <img src="{% static 'img/team.png' %}" alt="Our team working together">
       </div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section id="features" class="features" aria-labelledby="features-title" data-aos="fade-up" data-aos-duration="1000">
+<!-- PROBLEMS & SOLUTIONS -->
+<section id="problems" class="features" aria-labelledby="problems-title" data-aos="fade-up" data-aos-duration="1000">
   <div class="container container-inner">
-    <h2 id="features-title" data-aos="fade-up" data-aos-duration="900">Features</h2>
+    <h2 id="problems-title" data-aos="fade-up" data-aos-duration="900">Problems & Solutions</h2>
 
     <p class="features-lead" data-aos="fade-up" data-aos-duration="900" data-aos-delay="120">
-      Инструменты и сервисы, которые ускоряют разработку и делают инфраструктуру надёжной.
+      Какие ключевые проблемы мы решаем с помощью Face ID и Car Detection.
     </p>
 
     <div class="feature-list">
       <article class="feature-card" data-aos="fade-up" data-aos-delay="150" data-aos-duration="900">
         <div class="feature-icon" aria-hidden="true">
-          <!-- аккуратная SVG-иконка -->
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3>Fast Deployments</h3>
-        <p>Моментальные развертывания и предсказуемые откаты — меньше времени на ручные операции.</p>
+        <h3>Проблема: Недостаток безопасности</h3>
+        <p>Водители могут передавать автомобиль третьим лицам без контроля.</p>
+        <h4>Решение:</h4>
+        <p>Face ID гарантирует, что за рулём только верифицированный пользователь.</p>
       </article>
 
       <article class="feature-card" data-aos="fade-up" data-aos-delay="300" data-aos-duration="900">
         <div class="feature-icon" aria-hidden="true">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 16v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M4.5 6.5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M15.5 13.5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
           </svg>
         </div>
-        <h3>Secure by Default</h3>
-        <p>Шифрование, аутентификация и политики безопасности по умолчанию.</p>
+        <h3>Проблема: Повреждения авто</h3>
+        <p>Компании и пользователи сталкиваются с повреждениями, но трудно определить, когда они появились.</p>
+        <h4>Решение:</h4>
+        <p>Car Detection автоматически фиксирует состояние машины до и после поездки.</p>
       </article>
 
       <article class="feature-card" data-aos="fade-up" data-aos-delay="450" data-aos-duration="900">
         <div class="feature-icon" aria-hidden="true">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-            <path d="M19.4 15a7.5 7.5 0 0 0 0-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M4.6 9a7.5 7.5 0 0 0 0 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2"/>
           </svg>
         </div>
-        <h3>Observability</h3>
-        <p>Лёгкий доступ к метрикам, логам и трассам для быстрого расследования инцидентов.</p>
+        <h3>Проблема: Недоверие пассажиров</h3>
+        <p>Пассажиры сомневаются в надёжности сервиса.</p>
+        <h4>Решение:</h4>
+        <p>Прозрачность через автоматический контроль повышает доверие и улучшает сервис.</p>
       </article>
     </div>
   </div>
@@ -134,25 +132,23 @@
 <section id="faq" class="faq" aria-labelledby="faq-title" data-aos="fade-up" data-aos-duration="800">
   <div class="container container-inner">
     <h2 id="faq-title" data-aos="fade-up" data-aos-duration="700">FAQ</h2>
-    <p class="faq-lead" data-aos="fade-up" data-aos-duration="700" data-aos-delay="100">Часто задаваемые вопросы о развёртывании, безопасности и интеграциях.</p>
+    <p class="faq-lead" data-aos="fade-up" data-aos-duration="700" data-aos-delay="100">Ответы на часто задаваемые вопросы о Face ID и Car Detection.</p>
 
     <div class="faq-list">
       <details open>
-        <summary>Как быстро можно развернуть сервис на Edge?</summary>
-        <div class="answer">Базовый сервис можно развернуть за считанные минуты с готовыми шаблонами и автоматическим CI/CD.</div>
+        <summary>Face ID безопасен для хранения данных?</summary>
+        <div class="answer">Да, все биометрические данные шифруются и хранятся локально на устройстве.</div>
       </details>
 
       <details>
-        <summary>Какие механизмы безопасности встроены по умолчанию?</summary>
-        <div class="answer">Шифрование транспортного уровня, встроенная аутентификация и политики доступа на уровне сервиса.</div>
+        <summary>Car Detection требует дорогого оборудования?</summary>
+        <div class="answer">Нет, система работает с обычной камерой смартфона или установленной камерой авто.</div>
       </details>
 
       <details>
-        <summary>Поддерживаются ли интеграции с облаками и CI?</summary>
-        <div class="answer">Да — готовые коннекторы для AWS, GCP, Azure, Docker и GitHub Actions.</div>
+        <summary>Можно ли интегрировать решение в каршеринг?</summary>
+        <div class="answer">Да, наши API и SDK легко интегрируются в существующие приложения.</div>
       </details>
-
-      
     </div>
   </div>
 </section>
@@ -162,24 +158,20 @@
      data-aos-delay="300"
      data-aos-offset="0" data-aos-duration="3000" class="robot-3d"url="https://prod.spline.design/WP5PQu2xKT5us3JJ/scene.splinecode"></spline-viewer>
 
-   
-   
-     <footer class="site-footer" role="contentinfo" data-aos="fade-up" data-aos-duration="800">
+<footer class="site-footer" role="contentinfo" data-aos="fade-up" data-aos-duration="800">
   <div class="about-inner">
     <div class="brand">MindMap</div>
     <div style="opacity:0.9; margin-bottom:0.5rem;">Ship fast. Ship safe.</div>
     <nav class="footer-nav" aria-label="Footer">
       <a href="#">Nargiza</a>
       <a href="#">Rauan</a>
-      
     </nav>
   </div>
 </footer>
-       <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.57/build/spline-viewer.js"></script>
 <script>
     AOS.init();
-  </script>
+</script>
 </body>
 </html>
