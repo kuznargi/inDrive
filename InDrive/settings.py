@@ -9,9 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-9()^&+5h#f%@(7u%kxcw&+ma@8lpybf=wnpsm@+qw*i_q=$$3#')
 
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+# DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1",".vercel.app"]
+ALLOWED_HOSTS = ["37.27.216.212", "your-domain.com"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
