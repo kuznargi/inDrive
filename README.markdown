@@ -20,18 +20,8 @@
 - Диск: ~5 ГБ для моделей и зависимостей
 
 ### Зависимости
-Установите зависимости из `requirements.txt`:
-- Python 3.8+
-- Django==4.2
-- torch==2.0.1
-- torchvision==0.15.2
-- ultralytics==8.0.196 (YOLOv8)
-- deepface==0.0.79
-- opencv-python==4.8.0
-- pillow==10.0.0
-- numpy==1.24.3
-- google-generativeai==0.3.2 (для Gemini API)
-- python-dotenv==1.0.0
+Установите зависимости из `requirements.txt`
+ 
 
 ## Установка
 
